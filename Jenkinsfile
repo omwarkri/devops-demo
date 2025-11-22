@@ -12,23 +12,28 @@ pipeline {
         stage('Deploy HTML to Nginx') {
             steps {
                 sh '''
-                    # Ensure index.html exists
+                    # Ensure Login.html exists
                     if [ ! -f Login.html ]; then
                         echo "ERROR: Login.html not found!"
                         exit 1
                     fi
 
-                    # Clean old files
+                    # Clean old files from Nginx directory
                     sudo rm -rf /var/www/html/*
 
-                    # Copy all files (Login.html, css, images)
+                    # Copy all project files (HTML, CSS, images)
                     sudo cp -r * /var/www/html/
 
-                    # Set correct permissions
+                    # Rename Login.html to index.html for Nginx
+                    if [ -f /var/www/html/Login.html ]; then
+                        sudo mv /var/www/html/Login.html /var/www/html/index.html
+                    fi
+
+                    # Fix permissions to avoid 403 errors
                     sudo chown -R www-data:www-data /var/www/html
                     sudo chmod -R 755 /var/www/html
 
-                    # Restart nginx service
+                    # Restart Nginx server
                     sudo systemctl restart nginx
                 '''
             }
